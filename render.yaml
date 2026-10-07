@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: globelife-care-portal
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+      - key: Redis__ConnectionString
+        sync: false
+      - key: Jwt__SigningKey
+        sync: false

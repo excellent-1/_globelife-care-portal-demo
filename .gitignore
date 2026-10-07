@@ -1,0 +1,6 @@
+# Local secrets and generated deployment state
+.env
+.env.*
+!.env.example
+*.tfvars
+*.tfstate*
