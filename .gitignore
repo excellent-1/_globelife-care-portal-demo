@@ -1,6 +1,14 @@
-# Local secrets and generated deployment state
+# Secrets
 .env
 .env.*
 !.env.example
+
+# Terraform state and variables
 *.tfvars
 *.tfstate*
+
+# Build artifacts
+**/bin/
+**/obj/
+node_modules/
+dist/
