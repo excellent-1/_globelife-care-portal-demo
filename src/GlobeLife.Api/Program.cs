@@ -14,7 +14,9 @@ builder.Services.AddAuthorization(options => options.AddPolicy("Customer", polic
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ => RedisConnectionStringNormalizer.Connect(builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379"));
 builder.Services.AddSingleton<IPolicyRepository, PolicyRepository>();
 builder.Services.AddSingleton<IPolicyQueryService, PolicyQueryService>();
-builder.Services.AddSingleton<IPolicyAuditRepository, InMemoryPolicyAuditRepository>();
+builder.Services.AddSingleton<ObjectStoragePort, LocalObjectStoragePort>();
+builder.Services.AddSingleton<WorkflowCommandBus, LocalWorkflowCommandBus>();
+builder.Services.AddSingleton<IDocumentWorkflowOrchestrator, DocumentWorkflowOrchestrator>();
 builder.Services.AddSingleton<ICredentialRepository, DemoCredentialRepository>();
 builder.Services.AddSingleton<JwtAccessTokenIssuer>();
 var app = builder.Build();
@@ -26,6 +28,8 @@ app.MapPost("/api/auth/login", (LoginCommand command, ICredentialRepository cred
 app.MapGet("/api/policies", (IPolicyQueryService query, HttpContext context, CancellationToken token) => query.GetCustomerPoliciesAsync(context.User.Identity?.Name ?? "unknown", token)).RequireAuthorization("Customer");
 app.MapGet("/api/support/queue", () => Results.Ok(new[] { new { id = "SUP-1001", priority = "High", subject = "Payment question", status = "Open" }, new { id = "SUP-1002", priority = "Normal", subject = "Document request", status = "Open" } })).RequireAuthorization(new Microsoft.AspNetCore.Authorization.AuthorizeAttribute { Roles = "Support" });
 app.MapPost("/api/support-requests", (SupportRequest request) => Results.Accepted("/api/support-requests", new { request.Category, request.Message, status = "received" })).RequireAuthorization("Customer");
+app.MapPost("/api/documents", async (DocumentSubmission submission, IDocumentWorkflowOrchestrator workflow, CancellationToken token) => Results.Accepted($"/api/documents/{submission.DocumentId}", await workflow.SubmitAsync(submission, token))).RequireAuthorization("Customer");
+app.MapPost("/api/documents/upload-url", async (string objectKey, string contentType, ObjectStoragePort storage, CancellationToken token) => Results.Ok(new { uploadUrl = await storage.CreateUploadUrlAsync(objectKey, contentType, token) })).RequireAuthorization("Customer");
 app.MapFallbackToFile("index.html");
 app.Run();
 
