@@ -12,3 +12,6 @@
 **/obj/
 node_modules/
 dist/
+
+infra/terraform/.terraform/
+
