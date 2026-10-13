@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"identity","Source":"./modules/cognito","Dir":"modules/cognito"},{"Key":"storage","Source":"./modules/storage","Dir":"modules/storage"},{"Key":"workflow","Source":"./modules/workflow","Dir":"modules/workflow"}]}

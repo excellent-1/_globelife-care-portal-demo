@@ -21,7 +21,8 @@ public sealed class DocumentWorkflowOrchestrator(ObjectStoragePort objectStorage
 {
     public async Task<WorkflowStatus> SubmitAsync(DocumentSubmission submission, CancellationToken cancellationToken)
     {
+        var uploadUrl = await objectStorage.CreateUploadUrlAsync(submission.ObjectKey, "application/octet-stream", cancellationToken);
         await commandBus.EnqueueAsync(submission, cancellationToken);
-        return new WorkflowStatus(submission.DocumentId, "Queued", 0, DateTimeOffset.UtcNow);
+        return new WorkflowStatus(submission.DocumentId, $"Queued:{uploadUrl}", 0, DateTimeOffset.UtcNow);
     }
 }
